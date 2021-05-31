@@ -71,6 +71,30 @@ namespace SkipListSharp
             return level;
         }
 
+        public T Search(T value)
+        {
+            var level = towerHeight;
+            var currentNode = Start.Nodes[towerHeight - 1];
+
+            while (true)
+            {
+                while (currentNode.Next.Value.CompareTo(value) <= 0)
+                {
+                    currentNode = currentNode.Next;
+                }
+
+                if (level == 0)
+                {
+                    return currentNode.Value; // todo: bundle data and return?
+                }
+                else
+                {
+                    level--;
+                    currentNode = currentNode.ParentTower.Nodes[level];
+                }
+            }
+        }
+
         public void ConsoleVisualize()
         {
             var node = Start.Nodes[0];
