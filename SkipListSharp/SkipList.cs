@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace SkipListSharp
 {
@@ -68,6 +69,48 @@ namespace SkipListSharp
                 level++;
             }
             return level;
+        }
+
+        public void ConsoleVisualize()
+        {
+            var node = Start.Nodes[0];
+            var towers = new List<SkipTower<T>>();
+
+            while (node != null)
+            {
+                towers.Add(node.ParentTower);
+                node = node.Next;
+            }
+
+            var rows = new String[towers[0].Height];
+            for (var i = 0; i < towers[0].Height; i++) { rows[i] = ""; }
+
+            for(var i=0; i<towers.Count; i++)
+            {
+                var tower = towers[i];
+                var contentSize = tower.Nodes[0].Value.ToString().Length;
+                for (var level = 0; level < towerHeight; level++) 
+                {
+                    if (level >= tower.Height)
+                    {
+                        rows[level] += new string('-', contentSize);
+                    } 
+                    else
+                    {
+                        rows[level] += tower.Nodes[level].Value;
+                    }
+
+                    if (i != towers.Count - 1)
+                    {
+                        rows[level] += " - ";
+                    }
+                }
+            }
+
+            foreach(var row in rows.Reverse())
+            {
+                Console.WriteLine(row);
+            }
         }
     }
 }
