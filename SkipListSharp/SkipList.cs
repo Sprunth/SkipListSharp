@@ -9,7 +9,7 @@ namespace SkipListSharp
     {
         readonly int towerHeight = 3;
         SkipTower<T> Start;
-        Random rand;
+        readonly Random rand;
         public SkipList()
         {
             rand = new Random();
@@ -73,6 +73,12 @@ namespace SkipListSharp
 
         public T Search(T value)
         {
+            var tower = SearchForTower(value);
+            return tower.Nodes[0].Value; // until we start bundling extra data in the nodes
+        }
+
+        private SkipTower<T> SearchForTower(T value)
+        {
             var level = towerHeight;
             var currentNode = Start.Nodes[towerHeight - 1];
 
@@ -85,12 +91,49 @@ namespace SkipListSharp
 
                 if (level == 0)
                 {
-                    return currentNode.Value; // todo: bundle data and return?
+                    return currentNode.ParentTower;
                 }
                 else
                 {
                     level--;
                     currentNode = currentNode.ParentTower.Nodes[level];
+                }
+            }
+        }
+
+        public void Delete(T value)
+        {
+            // nodes prior to the deleted one that we need to update
+            var predecessorNodes = new SkipNode<T>[towerHeight];
+
+            {
+                var level = towerHeight - 1;
+                var currentNode = Start.Nodes[level];
+
+                var foundAll = false;
+                while (!foundAll)
+                {
+                    while (currentNode.Next.Value.CompareTo(value) < 0)
+                    {
+                        currentNode = currentNode.Next;
+                    }
+
+                    if (level == 0)
+                    {
+                        predecessorNodes[level] = currentNode;
+                        foundAll = true;
+                    }
+                    else
+                    {
+                        predecessorNodes[level] = currentNode;
+                        level--;
+                        currentNode = currentNode.ParentTower.Nodes[level];
+                    }
+                }
+
+                foreach (var node in predecessorNodes)
+                {
+                    node.Next = node.Next.Next;
                 }
             }
         }

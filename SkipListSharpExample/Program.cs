@@ -14,6 +14,8 @@ namespace SkipListSharpExample
             skipList.Insert(7);
             skipList.ConsoleVisualize();
             Console.WriteLine($"Searching for 12: {skipList.Search(12)}");
+            skipList.Delete(12);
+            skipList.ConsoleVisualize();
             Console.ReadLine();
         }
     }
