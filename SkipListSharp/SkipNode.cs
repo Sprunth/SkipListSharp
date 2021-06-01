@@ -2,14 +2,12 @@
 
 namespace SkipListSharp
 {
-    public class SkipNode<T>
+    public class SkipNode<T, T2>
     {
-        public T Value { get; private set; }
-        public SkipNode<T> Next { get; set; }
-        public SkipTower<T> ParentTower { get; private set; }
-        public SkipNode(T value, SkipTower<T> parent)
+        public SkipNode<T, T2> Next { get; set; }
+        public SkipTower<T, T2> ParentTower { get; private set; }
+        public SkipNode(SkipTower<T, T2> parent)
         {
-            Value = value;
             ParentTower = parent;
         }
     }

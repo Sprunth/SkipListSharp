@@ -5,25 +5,25 @@ using System.Linq;
 
 namespace SkipListSharp
 {
-    public class SkipList<T> where T : IComparable<T>
+    public class SkipList<T, T2> where T : IComparable<T>
     {
         readonly int towerHeight = 3;
-        SkipTower<T> Start;
+        SkipTower<T, T2> Start;
         readonly Random rand;
         public SkipList()
         {
             rand = new Random();
         }
 
-        public void Insert(T item)
+        public void Insert(T key, T2 item)
         {
             if (Start == null)
             {
-                Start = new SkipTower<T>(towerHeight, item);
+                Start = new SkipTower<T, T2>(towerHeight, key, item);
             }
             else if (Start.Nodes[0].Next == null)
             {
-                var end = new SkipTower<T>(towerHeight, item);
+                var end = new SkipTower<T, T2>(towerHeight, key, item);
                 for (var i=0; i<towerHeight; i++)
                 {
                     Start.Nodes[i].Next = end.Nodes[i];
@@ -31,15 +31,15 @@ namespace SkipListSharp
             }
             else
             {
-                var tower = new SkipTower<T>(GenerateTargetLevel() + 1, item);
+                var tower = new SkipTower<T, T2>(GenerateTargetLevel() + 1, key, item);
                 RecursiveInsert(Start.Nodes[Start.Height - 1], tower, Start.Height);
             }
         }
 
-        private bool RecursiveInsert(SkipNode<T> root, SkipTower<T> tower, int level)
+        private bool RecursiveInsert(SkipNode<T, T2> root, SkipTower<T, T2> tower, int level)
         {
             // all items in the tower are the same so any will do for comparison
-            if (root.Next.Value.CompareTo(tower.Nodes[0].Value) < 0)
+            if (root.Next.ParentTower.Key.CompareTo(tower.Key) < 0)
             {
                 return RecursiveInsert(root.Next, tower, level);
             }
@@ -67,24 +67,28 @@ namespace SkipListSharp
             while(rand.Next(2) == 0)
             {
                 level++;
+                if (level == towerHeight - 1)
+                {
+                    break;
+                }
             }
             return level;
         }
 
-        public T Search(T value)
+        public T2 Search(T value)
         {
             var tower = SearchForTower(value);
-            return tower.Nodes[0].Value; // until we start bundling extra data in the nodes
+            return tower.Value;
         }
 
-        private SkipTower<T> SearchForTower(T value)
+        private SkipTower<T, T2> SearchForTower(T key)
         {
             var level = towerHeight;
             var currentNode = Start.Nodes[towerHeight - 1];
 
             while (true)
             {
-                while (currentNode.Next.Value.CompareTo(value) <= 0)
+                while (currentNode.Next.ParentTower.Key.CompareTo(key) <= 0)
                 {
                     currentNode = currentNode.Next;
                 }
@@ -101,10 +105,10 @@ namespace SkipListSharp
             }
         }
 
-        public void Delete(T value)
+        public void Delete(T key)
         {
             // nodes prior to the deleted one that we need to update
-            var predecessorNodes = new SkipNode<T>[towerHeight];
+            var predecessorNodes = new SkipNode<T, T2>[towerHeight];
 
             {
                 var level = towerHeight - 1;
@@ -113,7 +117,7 @@ namespace SkipListSharp
                 var foundAll = false;
                 while (!foundAll)
                 {
-                    while (currentNode.Next.Value.CompareTo(value) < 0)
+                    while (currentNode.Next.ParentTower.Key.CompareTo(key) < 0)
                     {
                         currentNode = currentNode.Next;
                     }
@@ -141,7 +145,7 @@ namespace SkipListSharp
         public void ConsoleVisualize()
         {
             var node = Start.Nodes[0];
-            var towers = new List<SkipTower<T>>();
+            var towers = new List<SkipTower<T, T2>>();
 
             while (node != null)
             {
@@ -155,7 +159,7 @@ namespace SkipListSharp
             for(var i=0; i<towers.Count; i++)
             {
                 var tower = towers[i];
-                var contentSize = tower.Nodes[0].Value.ToString().Length;
+                var contentSize = tower.Nodes[0].ParentTower.Key.ToString().Length;
                 for (var level = 0; level < towerHeight; level++) 
                 {
                     if (level >= tower.Height)
@@ -164,7 +168,7 @@ namespace SkipListSharp
                     } 
                     else
                     {
-                        rows[level] += tower.Nodes[level].Value;
+                        rows[level] += tower.Key;
                     }
 
                     if (i != towers.Count - 1)
