@@ -75,9 +75,9 @@ namespace SkipListSharp
             return level;
         }
 
-        public T2 Search(T value)
+        public T2 Search(T key)
         {
-            var tower = SearchForTower(value);
+            var tower = SearchForTower(key);
             return tower.Value;
         }
 
