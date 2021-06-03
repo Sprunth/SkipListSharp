@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SkipListSharp
+namespace SkipListSharp.Nodes
 {
     public class SkipNode<T, T2>
     {
