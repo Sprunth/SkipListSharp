@@ -22,10 +22,10 @@ namespace SkipListSharp
             }
         }
 
-        public void Insert(T key, T2 item)
+        public bool Insert(T key, T2 item)
         {
             var tower = SkipTower<T, T2>.CreateTower(GenerateTargetLevel() + 1, key, item);
-            RecursiveInsert(Start.Nodes[Start.Height - 1], tower, Start.Height);
+            return RecursiveInsert(Start.Nodes[Start.Height - 1], tower, Start.Height);
             
         }
 
@@ -39,6 +39,11 @@ namespace SkipListSharp
             
             if (level == 0)
             {
+                if (root.ParentTower.Key.CompareTo(tower.Key) == 0 || root.Next.ParentTower.Key.CompareTo(tower.Key) == 0)
+                {
+                    // node exists, we can't have duplicates!
+                    return false;
+                }
                 var old = root.Next;
                 root.Next = tower.Nodes[level]; // should be 0
                 tower.Nodes[level].Next = old;
@@ -98,7 +103,7 @@ namespace SkipListSharp
             }
         }
 
-        public void Delete(T key)
+        public bool Delete(T key)
         {
             // nodes prior to the deleted one that we need to update
             var predecessorNodes = new SkipNode<T, T2>[towerHeight];
@@ -128,10 +133,16 @@ namespace SkipListSharp
                     }
                 }
 
+                if (predecessorNodes[0].Next.ParentTower.Key.CompareTo(key) != 0)
+                {
+                    return false;
+                }
+
                 foreach (var node in predecessorNodes)
                 {
                     node.Next = node.Next.Next;
                 }
+                return true;
             }
         }
 

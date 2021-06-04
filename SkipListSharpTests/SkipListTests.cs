@@ -17,7 +17,14 @@ namespace SkipListSharp.Tests
         [Fact()]
         public void InsertTest()
         {
-            skipList.Insert(123, "test");
+            Assert.True(skipList.Insert(123, "test"));
+        }
+
+        [Fact(DisplayName = "Inserting existing key fails")]
+        public void InsertDuplicateKey()
+        {
+            Assert.True(skipList.Insert(22, "test"));
+            Assert.False(skipList.Insert(22, "test2"));
         }
 
         [Fact()]
@@ -29,15 +36,23 @@ namespace SkipListSharp.Tests
             Assert.Equal("goal", skipList.Search(3));
         }
 
-        [Fact()]
+        [Fact(DisplayName = "Basic Deletion")]
         public void DeleteTest()
         {
-            skipList.Insert(2, "test");
-            skipList.Insert(5, "test2");
             skipList.Insert(3, "goal");
-            skipList.Insert(4, "goal2");
-            skipList.Delete(3);
-            //skipList.Delete(234); // test deletion when you can't find the item
+            Assert.True(skipList.Delete(3));
+            
+        }
+
+        [Fact(DisplayName = "Delete non existant key")]
+        public void DeleteLastElementTest()
+        {
+            Assert.False(skipList.Delete(4));
+            skipList.Insert(20, "test");
+            Assert.False(skipList.Delete(19));
+            skipList.Insert(25, "test2");
+            Assert.False(skipList.Delete(23));
+            Assert.False(skipList.Delete(26));
         }
     }
 }
